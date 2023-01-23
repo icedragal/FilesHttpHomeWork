@@ -7,9 +7,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import me.egorzhuravlev.fileshttphomework.model.Recipe;
 import me.egorzhuravlev.fileshttphomework.services.RecipeService;
 import me.egorzhuravlev.fileshttphomework.services.ValidateService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -77,5 +81,27 @@ public class RecipeController {
     @GetMapping()
     public Map<Long, Recipe> getAll() {
         return recipeService.getAll();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(){
+        byte[] data = recipeService.export();
+        if (data == null){
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok()
+                .contentLength(data.length)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                .body(data);
+    }
+
+    @PostMapping("/import")
+    public void importData(@RequestParam("file")MultipartFile multipartFile){
+        try {
+            recipeService.importData(multipartFile.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

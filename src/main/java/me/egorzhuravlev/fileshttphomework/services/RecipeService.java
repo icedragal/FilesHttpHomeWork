@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.egorzhuravlev.fileshttphomework.model.Recipe;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,8 +31,13 @@ public class RecipeService {
 
     @PostConstruct
     public void init() {
+        readFromFile();
+    }
+
+    private void readFromFile() {
         try {
-            Map<Long, Recipe> fromFile = objectMapper.readValue(Files.readAllBytes(pathToFile), new TypeReference<>(){});
+            Map<Long, Recipe> fromFile = objectMapper.readValue(Files.readAllBytes(pathToFile), new TypeReference<>() {
+            });
             recipes.putAll(fromFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,29 +53,48 @@ public class RecipeService {
         }
     }
 
-    public String add(Recipe recipe){
+    public String add(Recipe recipe) {
         recipes.put(idGenerator++, recipe);
         writeToFile();
-        return  "Добавлен рецепт: \"" + recipe.getTitle() + "\", его ID: " + idGenerator;
+        return "Добавлен рецепт: \"" + recipe.getTitle() + "\", его ID: " + idGenerator;
     }
 
-    public Optional<Recipe> get(long id){
+    public Optional<Recipe> get(long id) {
         return Optional.ofNullable(recipes.get(id));
     }
 
     public Optional<Recipe> update(long id, Recipe recipe) {
-        Optional<Recipe> result =  Optional.ofNullable(recipes.replace(id, recipe));
+        Optional<Recipe> result = Optional.ofNullable(recipes.replace(id, recipe));
         writeToFile();
         return result;
     }
 
     public Optional<Recipe> delete(long id) {
-        Optional<Recipe> result =  Optional.ofNullable(recipes.remove(id));
+        Optional<Recipe> result = Optional.ofNullable(recipes.remove(id));
         writeToFile();
         return result;
     }
 
     public Map<Long, Recipe> getAll() {
         return new HashMap<>(recipes);
+    }
+
+    @Nullable
+    public byte[] export() {
+        try {
+            return Files.readAllBytes(pathToFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void importData(byte[] data) {
+        try {
+            Files.write(pathToFile, data);
+            readFromFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
