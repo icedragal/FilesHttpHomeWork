@@ -71,4 +71,11 @@ public class IngredientService {
     public Map<Long, Ingredient> getAll() {
         return new HashMap<>(ingredients);
     }
+    public void importData(byte[] data) {
+        try {
+            Files.write(pathToFile, data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

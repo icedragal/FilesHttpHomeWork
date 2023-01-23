@@ -9,7 +9,9 @@ import me.egorzhuravlev.fileshttphomework.services.IngredientService;
 import me.egorzhuravlev.fileshttphomework.services.ValidateService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -76,5 +78,14 @@ public class IngredientController {
     @GetMapping()
     public Map<Long, Ingredient> getAll() {
         return ingredientService.getAll();
+    }
+
+    @PostMapping("/import")
+    public void importData(@RequestParam("file") MultipartFile multipartFile){
+        try {
+            ingredientService.importData(multipartFile.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
