@@ -31,6 +31,10 @@ public class RecipeService {
 
     @PostConstruct
     public void init() {
+        readFromFile();
+    }
+
+    private void readFromFile() {
         try {
             Map<Long, Recipe> fromFile = objectMapper.readValue(Files.readAllBytes(pathToFile), new TypeReference<>() {
             });
@@ -88,6 +92,7 @@ public class RecipeService {
     public void importData(byte[] data) {
         try {
             Files.write(pathToFile, data);
+            readFromFile();
         } catch (IOException e) {
             e.printStackTrace();
         }

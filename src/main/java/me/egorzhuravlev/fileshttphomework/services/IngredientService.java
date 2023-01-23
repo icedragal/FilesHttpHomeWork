@@ -27,10 +27,16 @@ public class IngredientService {
         this.pathToFile = Paths.get(path);
         this.objectMapper = new ObjectMapper();
     }
+
     @PostConstruct
     public void init() {
+        readFromFile();
+    }
+
+    private void readFromFile() {
         try {
-            Map<Long, Ingredient> fromFile = objectMapper.readValue(Files.readAllBytes(pathToFile), new TypeReference<>(){});
+            Map<Long, Ingredient> fromFile = objectMapper.readValue(Files.readAllBytes(pathToFile), new TypeReference<>() {
+            });
             ingredients.putAll(fromFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -46,24 +52,24 @@ public class IngredientService {
         }
     }
 
-    public Ingredient add(Ingredient ingredient){
+    public Ingredient add(Ingredient ingredient) {
         ingredients.put(idGenerator++, ingredient);
         writeToFile();
         return ingredient;
     }
 
-    public Optional<Ingredient> get(long id){
+    public Optional<Ingredient> get(long id) {
         return Optional.ofNullable(ingredients.get(id));
     }
 
     public Optional<Ingredient> update(long id, Ingredient ingredient) {
-        Optional<Ingredient> result =  Optional.ofNullable(ingredients.replace(id, ingredient));
+        Optional<Ingredient> result = Optional.ofNullable(ingredients.replace(id, ingredient));
         writeToFile();
         return result;
     }
 
     public Optional<Ingredient> delete(long id) {
-        Optional<Ingredient> result =  Optional.ofNullable(ingredients.remove(id));
+        Optional<Ingredient> result = Optional.ofNullable(ingredients.remove(id));
         writeToFile();
         return result;
     }
@@ -71,9 +77,11 @@ public class IngredientService {
     public Map<Long, Ingredient> getAll() {
         return new HashMap<>(ingredients);
     }
+
     public void importData(byte[] data) {
         try {
             Files.write(pathToFile, data);
+            readFromFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
